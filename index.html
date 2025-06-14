@@ -139,6 +139,8 @@
       pointer-events: none;
       filter: drop-shadow(0 0 5px #d4af37);
       animation: chest-glimmer 2.5s infinite alternate;
+      transform: rotateX(0deg); /* Закрыт по умолчанию */
+      animation-play-state: running;
     }
 
     /* Мерцание золотистых искр на закрытом сундуке */
@@ -163,13 +165,13 @@
       transition: box-shadow 0.3s ease, transform 0.2s ease;
       user-select: none;
     }
-    #open-button:hover {
+    #open-button:hover:not(:disabled) {
       box-shadow:
         0 0 20px var(--golden-glitter),
         0 0 40px var(--golden-glitter);
       transform: scale(1.05);
     }
-    #open-button:active {
+    #open-button:active:not(:disabled) {
       transform: scale(0.95);
       box-shadow: 0 0 8px var(--golden-glitter);
     }
@@ -329,13 +331,13 @@
       opacity: 1;
       pointer-events: auto;
     }
-    #open-again-button:hover {
+    #open-again-button:hover:not(:disabled) {
       box-shadow:
         0 0 20px var(--golden-glitter),
         0 0 40px var(--golden-glitter);
       transform: scale(1.05);
     }
-    #open-again-button:active {
+    #open-again-button:active:not(:disabled) {
       transform: scale(0.95);
       box-shadow: 0 0 8px var(--golden-glitter);
     }
@@ -505,25 +507,59 @@
   </main>
 
   <script>
+    // Добавлено много слов разных редкостей
     const words = [
+      // Обычные (50%)
       { word: 'Дом', rarity: 'common' },
       { word: 'Книга', rarity: 'common' },
       { word: 'Река', rarity: 'common' },
+      { word: 'Солнце', rarity: 'common' },
+      { word: 'Лист', rarity: 'common' },
+      { word: 'Дерево', rarity: 'common' },
+      { word: 'Камень', rarity: 'common' },
+      { word: 'Огонь', rarity: 'common' },
+      { word: 'Ветер', rarity: 'common' },
+      { word: 'Песок', rarity: 'common' },
+
+      // Редкие (25%)
       { word: 'Галактика', rarity: 'rare' },
       { word: 'Океан', rarity: 'rare' },
       { word: 'Комета', rarity: 'rare' },
+      { word: 'Гора', rarity: 'rare' },
+      { word: 'Звезда', rarity: 'rare' },
+      { word: 'Облако', rarity: 'rare' },
+      { word: 'Пещера', rarity: 'rare' },
+      { word: 'Радуга', rarity: 'rare' },
+      { word: 'Планета', rarity: 'rare' },
+      { word: 'Парус', rarity: 'rare' },
+
+      // Сверхредкие (12%)
       { word: 'Метеорит', rarity: 'super-rare' },
-      { word: 'Планета', rarity: 'super-rare' },
       { word: 'Созвездие', rarity: 'super-rare' },
+      { word: 'Вулкан', rarity: 'super-rare' },
+      { word: 'Цунами', rarity: 'super-rare' },
+      { word: 'Лавина', rarity: 'super-rare' },
+      { word: 'Торнадо', rarity: 'super-rare' },
+
+      // Эпические (7%)
       { word: 'Волшебство', rarity: 'epic' },
       { word: 'Дракон', rarity: 'epic' },
       { word: 'Феникс', rarity: 'epic' },
+      { word: 'Магия', rarity: 'epic' },
+      { word: 'Легенда', rarity: 'epic' },
+
+      // Мифические (4%)
       { word: 'Эльф', rarity: 'mythic' },
       { word: 'Грифон', rarity: 'mythic' },
-      { word: 'Магия', rarity: 'mythic' },
+      { word: 'Волшебник', rarity: 'mythic' },
+      { word: 'Чародей', rarity: 'mythic' },
+
+      // Легендарные (2%)
       { word: 'Артефакт', rarity: 'legendary' },
       { word: 'Сокровище', rarity: 'legendary' },
       { word: 'Корона', rarity: 'legendary' },
+      { word: 'Меч Судьбы', rarity: 'legendary' },
+      { word: 'Кристалл Вечности', rarity: 'legendary' },
     ];
 
     const rarityChances = {
@@ -572,6 +608,9 @@
     };
     let totalOpened = 0;
 
+    // Флаг блокировки открытия, чтобы не открыть несколько одновременно
+    let isOpening = false;
+
     function updateStats() {
       for (const rarity in stats) {
         document.getElementById(`count-${rarity}`).textContent = stats[rarity];
@@ -614,6 +653,8 @@
     }
 
     async function openChest() {
+      if (isOpening) return; // блокируем повторные открытия
+      isOpening = true;
       openButton.disabled = true;
       openAgainButton.classList.remove('visible');
 
@@ -622,8 +663,11 @@
       wordDisplay.style.opacity = 0;
       wordDisplay.style.transform = 'translate(-50%, -50%) scale(0)';
 
+      // Крышка закрыта, мерцает
       chestLid.style.animationPlayState = 'running';
+      chestLid.style.transform = 'rotateX(0deg)';
 
+      // Анимация открытия крышки
       chestLid.classList.add('lid-opening');
 
       playSound('common');
@@ -643,6 +687,7 @@
         openButton.disabled = false;
         chestLid.classList.remove('lid-opening');
         chestLight.classList.remove('active');
+        isOpening = false;
         return;
       }
 
@@ -672,6 +717,7 @@
       chestLid.style.transform = 'rotateX(-110deg)';
 
       openButton.disabled = false;
+      isOpening = false;
     }
 
     function closeChest() {
@@ -687,6 +733,7 @@
     }
 
     openButton.addEventListener('click', () => {
+      if (isOpening) return;
       closeChest();
       setTimeout(() => {
         openChest();
@@ -694,6 +741,7 @@
     });
 
     openAgainButton.addEventListener('click', () => {
+      if (isOpening) return;
       closeChest();
       setTimeout(() => {
         openChest();
@@ -719,12 +767,14 @@
     chestContainer.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        if (!openButton.disabled) {
+        if (!openButton.disabled && !isOpening) {
           openButton.click();
         }
       }
     });
 
+    // Инициализация: сундук закрыт, счетчик и статистика обновлены
+    closeChest();
     updateStats();
   </script>
 
