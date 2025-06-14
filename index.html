@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Word from the Chest</title>
+  <style>
+    /* Цветовая палитра */
+    :root {
+      --wood-brown: #7a4f24;
+      --golden: #d4af37;
+      --golden-glitter: #ffd700;
+      --gray-beige: #bfb1a8;
+      --rare-blue: #3b82f6;
+      --super-rare-purple: #7c3aed;
+      --epic-pink: #ec4899;
+      --mythic-turquoise: #14b8a6;
+      --legendary-gold: #facc15;
+      --legendary-glow: rgba(250, 204, 21, 0.7);
+      --background-dark: #2c1f0e;
+      --text-light: #f5f1e9;
+      --shadow-dark: rgba(0, 0, 0, 0.7);
+    }
+
+    /* Сброс и базовые стили */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, #3b2f1a 0%, #1a1306 100%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text-light);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px;
+      user-select: none;
+      overflow-x: hidden;
+    }
+
+    /* Декоративный шрифт для заголовков */
+    @import url('https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap');
+    /* Для текста слов - крупный, четкий, плавная анимация */
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
+    /* Моноширинный для счетчика */
+    @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');
+
+    h1.title {
+      font-family: 'MedievalSharp', cursive;
+      font-size: 3.5rem;
+      color: var(--golden);
+      text-shadow:
+        2px 2px 4px var(--shadow-dark),
+        0 0 10px var(--golden);
+      margin-bottom: 20px;
+      user-select: none;
+    }
+
+    /* Контейнер главного экрана */
+    #main-screen {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      max-width: 480px;
+      width: 100%;
+    }
+
+    /* Сундук */
+    #chest-container {
+      position: relative;
+      width: 320px;
+      height: 280px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    /* Стилизованный сундук: деревянный с металлическими накладками */
+    #chest {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #6b4a1e 0%, #a9743b 100%);
+      border-radius: 20px 20px 12px 12px;
+      box-shadow:
+        inset 0 6px 10px #4a3210,
+        0 8px 15px rgba(0,0,0,0.7);
+      overflow: visible;
+    }
+
+    /* Металлические накладки */
+    #chest::before {
+      content: "";
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: 280px;
+      height: 40px;
+      background: linear-gradient(90deg, #555 0%, #aaa 50%, #555 100%);
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+      z-index: 2;
+    }
+    #chest::after {
+      content: "";
+      position: absolute;
+      bottom: 30px;
+      left: 40px;
+      width: 240px;
+      height: 20px;
+      background: linear-gradient(90deg, #555 0%, #aaa 50%, #555 100%);
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+      z-index: 2;
+    }
+
+    /* Крышка сундука */
+    #chest-lid {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 320px;
+      height: 100px;
+      background: linear-gradient(135deg, #7a4f24 0%, #c9a14a 100%);
+      border-radius: 20px 20px 0 0;
+      box-shadow:
+        inset 0 6px 10px #4a3210,
+        0 6px 10px rgba(0,0,0,0.7);
+      border-bottom: 3px solid #5c3e11;
+      transform-origin: bottom center;
+      z-index: 5;
+      pointer-events: none;
+      filter: drop-shadow(0 0 5px #d4af37);
+      animation: chest-glimmer 2.5s infinite alternate;
+    }
+
+    /* Мерцание золотистых искр на закрытом сундуке */
+    @keyframes chest-glimmer {
+      0% { filter: drop-shadow(0 0 3px #d4af37); }
+      100% { filter: drop-shadow(0 0 10px #ffd700); }
+    }
+
+    /* Кнопка открытия сундука */
+    #open-button {
+      margin-top: 25px;
+      background: linear-gradient(135deg, var(--golden) 0%, #c9a14a 100%);
+      border: none;
+      padding: 18px 48px;
+      font-size: 1.6rem;
+      font-weight: 700;
+      border-radius: 12px;
+      color: #3b2f0e;
+      cursor: pointer;
+      box-shadow:
+        0 0 10px var(--golden-glitter);
+      transition: box-shadow 0.3s ease, transform 0.2s ease;
+      user-select: none;
+    }
+    #open-button:hover {
+      box-shadow:
+        0 0 20px var(--golden-glitter),
+        0 0 40px var(--golden-glitter);
+      transform: scale(1.05);
+    }
+    #open-button:active {
+      transform: scale(0.95);
+      box-shadow: 0 0 8px var(--golden-glitter);
+    }
+    #open-button:disabled {
+      background: #a88b3a;
+      box-shadow: none;
+      cursor: default;
+      color: #5c4a0f;
+    }
+
+    /* Счётчик открытий */
+    #counter {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 1.4rem;
+      background: rgba(0,0,0,0.3);
+      padding: 10px 18px;
+      border-radius: 10px;
+      user-select: none;
+      color: var(--golden);
+      box-shadow: 0 0 8px var(--golden-glitter);
+      z-index: 100;
+    }
+
+    /* Появляющееся слово */
+    #word-display {
+      position: absolute;
+      top: 60%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 3.2rem;
+      color: var(--text-light);
+      text-align: center;
+      text-shadow:
+        2px 2px 6px var(--shadow-dark);
+      pointer-events: none;
+      opacity: 0;
+      user-select: none;
+      z-index: 10;
+      transition: opacity 0.6s ease;
+    }
+
+    /* Анимация появления слова */
+    .word-appear {
+      animation: word-appear-scale 1.5s forwards;
+    }
+    @keyframes word-appear-scale {
+      0% {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0;
+        text-shadow: 0 0 0 transparent;
+      }
+      50% {
+        transform: translate(-50%, -50%) scale(1.1);
+        opacity: 1;
+        text-shadow:
+          0 0 10px currentColor,
+          0 0 20px currentColor;
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+        text-shadow:
+          0 0 5px currentColor,
+          0 0 10px currentColor;
+      }
+    }
+
+    /* Цветные рамки и иконки редкости */
+    #word-display.frame-common {
+      border: 3px solid var(--gray-beige);
+      color: var(--gray-beige);
+      border-radius: 12px;
+      padding: 0 15px;
+    }
+    #word-display.frame-rare {
+      border: 3px solid var(--rare-blue);
+      color: var(--rare-blue);
+      border-radius: 12px;
+      padding: 0 15px;
+    }
+    #word-display.frame-super-rare {
+      border: 3px solid var(--super-rare-purple);
+      color: var(--super-rare-purple);
+      border-radius: 12px;
+      padding: 0 15px;
+    }
+    #word-display.frame-epic {
+      border: 3px solid var(--epic-pink);
+      color: var(--epic-pink);
+      border-radius: 12px;
+      padding: 0 15px;
+    }
+    #word-display.frame-mythic {
+      border: 3px solid var(--mythic-turquoise);
+      color: var(--mythic-turquoise);
+      border-radius: 12px;
+      padding: 0 15px;
+    }
+    #word-display.frame-legendary {
+      border: 3px solid var(--legendary-gold);
+      color: var(--legendary-gold);
+      border-radius: 12px;
+      padding: 0 15px;
+      box-shadow:
+        0 0 15px var(--legendary-glow),
+        0 0 30px var(--legendary-glow);
+      animation: legendary-glow 3s infinite alternate;
+    }
+    @keyframes legendary-glow {
+      0% {
+        box-shadow:
+          0 0 10px var(--legendary-glow),
+          0 0 20px var(--legendary-glow);
+      }
+      100% {
+        box-shadow:
+          0 0 25px var(--legendary-glow),
+          0 0 50px var(--legendary-glow);
+      }
+    }
+
+    /* Иконки редкости рядом со словом */
+    #rarity-icon {
+      display: inline-block;
+      vertical-align: middle;
+      margin-left: 12px;
+      width: 28px;
+      height: 28px;
+      filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
+      user-select: none;
+    }
+
+    /* Кнопка "Открыть ещё" (появляется после анимации) */
+    #open-again-button {
+      margin-top: 15px;
+      background: linear-gradient(135deg, var(--golden) 0%, #c9a14a 100%);
+      border: none;
+      padding: 14px 40px;
+      font-size: 1.4rem;
+      font-weight: 700;
+      border-radius: 12px;
+      color: #3b2f0e;
+      cursor: pointer;
+      box-shadow:
+        0 0 10px var(--golden-glitter);
+      transition: box-shadow 0.3s ease, transform 0.2s ease, opacity 0.4s ease;
+      user-select: none;
+      opacity: 0;
+      pointer-events: none;
+    }
+    #open-again-button.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    #open-again-button:hover {
+      box-shadow:
+        0 0 20px var(--golden-glitter),
+        0 0 40px var(--golden-glitter);
+      transform: scale(1.05);
+    }
+    #open-again-button:active {
+      transform: scale(0.95);
+      box-shadow: 0 0 8px var(--golden-glitter);
+    }
+
+    /* Мини-таблица статистики */
+    #stats-container {
+      width: 100%;
+      max-width: 480px;
+      background: rgba(0,0,0,0.4);
+      border-radius: 12px;
+      padding: 15px 20px;
+      margin-top: 20px;
+      font-size: 1rem;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text-light);
+      user-select: none;
+      box-shadow: 0 0 10px var(--golden-glitter);
+      transition: max-height 0.5s ease, opacity 0.5s ease;
+      overflow: hidden;
+    }
+
+    #stats-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    #stats-toggle {
+      cursor: pointer;
+      background: none;
+      border: none;
+      color: var(--golden);
+      font-weight: 700;
+      font-size: 1.2rem;
+      user-select: none;
+      transition: color 0.3s ease;
+    }
+    #stats-toggle:hover {
+      color: #fff;
+    }
+
+    #stats-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 10px;
+    }
+    #stats-table th, #stats-table td {
+      border: 1px solid var(--golden);
+      padding: 6px 12px;
+      text-align: center;
+    }
+    #stats-table th {
+      background: var(--golden);
+      color: #3b2f0e;
+      font-weight: 700;
+    }
+    #stats-table td {
+      background: rgba(255 255 255 / 0.1);
+    }
+
+    /* Прогресс бар */
+    .progress-bar {
+      width: 100%;
+      height: 18px;
+      background: rgba(255 255 255 / 0.15);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 10px;
+      transition: width 0.6s ease;
+    }
+    .progress-common { background: var(--gray-beige); }
+    .progress-rare { background: var(--rare-blue); }
+    .progress-super-rare { background: var(--super-rare-purple); }
+    .progress-epic { background: var(--epic-pink); }
+    .progress-mythic { background: var(--mythic-turquoise); }
+    .progress-legendary { background: var(--legendary-gold); box-shadow: 0 0 10px var(--legendary-glow); }
+
+    /* Фон главного экрана - старинная карта/библиотека */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1280&q=80') no-repeat center center/cover;
+      opacity: 0.15;
+      z-index: -1;
+      filter: sepia(0.7) contrast(0.8);
+    }
+  </style>
+</head>
+<body>
+  <h1 class="title" aria-label="Word from the Chest">Word from the Chest</h1>
+
+  <div id="counter" aria-live="polite" aria-atomic="true" aria-relevant="text">Открыто кейсов: 0</div>
+
+  <main id="main-screen" role="main" aria-label="Главный экран приложения">
+    <div id="chest-container" aria-label="Сундук для открытия" role="button" tabindex="0" aria-pressed="false" aria-describedby="open-button">
+      <div id="chest">
+        <div id="chest-lid"></div>
+        <div id="chest-light" aria-hidden="true"></div>
+      </div>
+      <div id="word-display" aria-live="polite" aria-atomic="true"></div>
+    </div>
+
+    <button id="open-button" aria-label="Открыть сундук">Открыть сундук</button>
+    <button id="open-again-button" aria-label="Открыть ещё сундук">Открыть ещё</button>
+
+    <section id="stats-container" aria-label="Статистика выпадений слов">
+      <div id="stats-header">
+        <h2 style="color: var(--golden); font-family: 'MedievalSharp', cursive;">Статистика выпадений</h2>
+        <button id="stats-toggle" aria-expanded="true" aria-controls="stats-table">Скрыть</button>
+      </div>
+      <table id="stats-table" role="table" aria-describedby="stats-description">
+        <caption id="stats-description" class="sr-only">Таблица с количеством выпавших слов по категориям редкости</caption>
+        <thead>
+          <tr>
+            <th>Редкость</th>
+            <th>Количество</th>
+            <th>Шанс (%)</th>
+            <th>Прогресс</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Обычный</td>
+            <td id="count-common">0</td>
+            <td>50</td>
+            <td><div class="progress-bar"><div class="progress-fill progress-common" style="width: 0%;"></div></div></td>
+          </tr>
+          <tr>
+            <td>Редкий</td>
+            <td id="count-rare">0</td>
+            <td>25</td>
+            <td><div class="progress-bar"><div class="progress-fill progress-rare" style="width: 0%;"></div></div></td>
+          </tr>
+          <tr>
+            <td>Сверхредкий</td>
+            <td id="count-super-rare">0</td>
+            <td>12</td>
+            <td><div class="progress-bar"><div class="progress-fill progress-super-rare" style="width: 0%;"></div></div></td>
+          </tr>
+          <tr>
+            <td>Эпический</td>
+            <td id="count-epic">0</td>
+            <td>7</td>
+            <td><div class="progress-bar"><div class="progress-fill progress-epic" style="width: 0%;"></div></div></td>
+          </tr>
+          <tr>
+            <td>Мифический</td>
+            <td id="count-mythic">0</td>
+            <td>4</td>
+            <td><div class="progress-bar"><div class="progress-fill progress-mythic" style="width: 0%;"></div></div></td>
+          </tr>
+          <tr>
+            <td>Легендарный</td>
+            <td id="count-legendary">0</td>
+            <td>2</td>
+            <td><div class="progress-bar"><div class="progress-fill progress-legendary" style="width: 0%;"></div></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <script>
+    const words = [
+      { word: 'Дом', rarity: 'common' },
+      { word: 'Книга', rarity: 'common' },
+      { word: 'Река', rarity: 'common' },
+      { word: 'Галактика', rarity: 'rare' },
+      { word: 'Океан', rarity: 'rare' },
+      { word: 'Комета', rarity: 'rare' },
+      { word: 'Метеорит', rarity: 'super-rare' },
+      { word: 'Планета', rarity: 'super-rare' },
+      { word: 'Созвездие', rarity: 'super-rare' },
+      { word: 'Волшебство', rarity: 'epic' },
+      { word: 'Дракон', rarity: 'epic' },
+      { word: 'Феникс', rarity: 'epic' },
+      { word: 'Эльф', rarity: 'mythic' },
+      { word: 'Грифон', rarity: 'mythic' },
+      { word: 'Магия', rarity: 'mythic' },
+      { word: 'Артефакт', rarity: 'legendary' },
+      { word: 'Сокровище', rarity: 'legendary' },
+      { word: 'Корона', rarity: 'legendary' },
+    ];
+
+    const rarityChances = {
+      common: 50,
+      rare: 25,
+      'super-rare': 12,
+      epic: 7,
+      mythic: 4,
+      legendary: 2,
+    };
+
+    const rarityIcons = {
+      common: `<svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="gray" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>`,
+      rare: `<svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 8 22 9 17 14 18 21 12 18 6 21 7 14 2 9 9 8 12 2"/></svg>`,
+      'super-rare': `<svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 8 22 9 17 14 18 21 12 18 6 21 7 14 2 9 9 8 12 2"/><circle cx="12" cy="12" r="3"/></svg>`,
+      epic: `<svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 L15 8 L22 9 L17 14 L18 21 L12 18 L6 21 L7 14 L2 9 L9 8 Z"/><circle cx="12" cy="12" r="3" fill="#ec4899"/></svg>`,
+      mythic: `<svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 L15 8 L22 9 L17 14 L18 21 L12 18 L6 21 L7 14 L2 9 L9 8 Z"/><circle cx="12" cy="12" r="4" fill="#14b8a6"/></svg>`,
+      legendary: `<svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="gold" stroke="goldenrod" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 8 22 9 17 14 18 21 12 18 6 21 7 14 2 9 9 8 12 2"/></svg>`,
+    };
+
+    const soundUrls = {
+      common: 'https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg',
+      rare: 'https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg',
+      'super-rare': 'https://actions.google.com/sounds/v1/cartoon/metal_thud_and_wobble.ogg',
+      epic: 'https://actions.google.com/sounds/v1/cartoon/clang.ogg',
+      mythic: 'https://actions.google.com/sounds/v1/cartoon/laser_shoot.ogg',
+      legendary: 'https://actions.google.com/sounds/v1/cartoon/heroic_fanfare.ogg',
+    };
+
+    const chestLid = document.getElementById('chest-lid');
+    const chestLight = document.getElementById('chest-light');
+    const openButton = document.getElementById('open-button');
+    const openAgainButton = document.getElementById('open-again-button');
+    const wordDisplay = document.getElementById('word-display');
+    const counterDisplay = document.getElementById('counter');
+    const statsToggle = document.getElementById('stats-toggle');
+    const statsContainer = document.getElementById('stats-container');
+
+    const stats = {
+      common: 0,
+      rare: 0,
+      'super-rare': 0,
+      epic: 0,
+      mythic: 0,
+      legendary: 0,
+    };
+    let totalOpened = 0;
+
+    function updateStats() {
+      for (const rarity in stats) {
+        document.getElementById(`count-${rarity}`).textContent = stats[rarity];
+        const progressFill = document.querySelector(`.progress-fill.progress-${rarity}`);
+        const percent = totalOpened ? (stats[rarity] / totalOpened) * 100 : 0;
+        progressFill.style.width = percent + '%';
+      }
+    }
+
+    function getRandomRarity() {
+      const rand = Math.random() * 100;
+      let sum = 0;
+      for (const rarity in rarityChances) {
+        sum += rarityChances[rarity];
+        if (rand < sum) return rarity;
+      }
+      return 'common';
+    }
+
+    function getRandomWordByRarity(rarity) {
+      const filtered = words.filter(w => w.rarity === rarity);
+      if (filtered.length === 0) return null;
+      const index = Math.floor(Math.random() * filtered.length);
+      return filtered[index];
+    }
+
+    function playSound(rarity) {
+      const url = soundUrls[rarity];
+      if (!url) return;
+      const audio = new Audio(url);
+      audio.volume = 0.4;
+      audio.play().catch(() => {});
+    }
+
+    function createRarityIcon(rarity) {
+      const span = document.createElement('span');
+      span.id = 'rarity-icon';
+      span.innerHTML = rarityIcons[rarity] || '';
+      return span;
+    }
+
+    async function openChest() {
+      openButton.disabled = true;
+      openAgainButton.classList.remove('visible');
+
+      wordDisplay.textContent = '';
+      wordDisplay.className = '';
+      wordDisplay.style.opacity = 0;
+      wordDisplay.style.transform = 'translate(-50%, -50%) scale(0)';
+
+      chestLid.style.animationPlayState = 'running';
+
+      chestLid.classList.add('lid-opening');
+
+      playSound('common');
+
+      await new Promise(r => setTimeout(r, 1200));
+
+      chestLight.classList.add('active');
+
+      await new Promise(r => setTimeout(r, 600));
+
+      const rarity = getRandomRarity();
+      const chosenWordObj = getRandomWordByRarity(rarity);
+
+      if (!chosenWordObj) {
+        wordDisplay.textContent = 'Ошибка';
+        wordDisplay.style.color = 'red';
+        openButton.disabled = false;
+        chestLid.classList.remove('lid-opening');
+        chestLight.classList.remove('active');
+        return;
+      }
+
+      stats[rarity]++;
+      totalOpened++;
+      updateStats();
+      counterDisplay.textContent = `Открыто кейсов: ${totalOpened}`;
+
+      wordDisplay.className = 'word-appear frame-' + rarity;
+      wordDisplay.textContent = chosenWordObj.word;
+
+      const icon = createRarityIcon(rarity);
+      wordDisplay.appendChild(icon);
+
+      playSound(rarity);
+
+      wordDisplay.style.opacity = 1;
+      wordDisplay.style.transform = 'translate(-50%, -50%) scale(1)';
+
+      await new Promise(r => setTimeout(r, 1500));
+
+      openAgainButton.classList.add('visible');
+
+      chestLight.style.opacity = 0.6;
+
+      chestLid.style.animationPlayState = 'paused';
+      chestLid.style.transform = 'rotateX(-110deg)';
+
+      openButton.disabled = false;
+    }
+
+    function closeChest() {
+      chestLid.style.animationPlayState = 'running';
+      chestLid.style.transform = 'rotateX(0deg)';
+      chestLid.classList.remove('lid-opening');
+      chestLight.classList.remove('active');
+      chestLight.style.opacity = 0;
+      wordDisplay.style.opacity = 0;
+      wordDisplay.style.transform = 'translate(-50%, -50%) scale(0)';
+      wordDisplay.textContent = '';
+      openAgainButton.classList.remove('visible');
+    }
+
+    openButton.addEventListener('click', () => {
+      closeChest();
+      setTimeout(() => {
+        openChest();
+      }, 300);
+    });
+
+    openAgainButton.addEventListener('click', () => {
+      closeChest();
+      setTimeout(() => {
+        openChest();
+      }, 300);
+    });
+
+    statsToggle.addEventListener('click', () => {
+      const expanded = statsToggle.getAttribute('aria-expanded') === 'true';
+      if (expanded) {
+        statsContainer.style.maxHeight = '40px';
+        statsContainer.style.opacity = '0.3';
+        statsToggle.textContent = 'Показать';
+        statsToggle.setAttribute('aria-expanded', 'false');
+      } else {
+        statsContainer.style.maxHeight = '1000px';
+        statsContainer.style.opacity = '1';
+        statsToggle.textContent = 'Скрыть';
+        statsToggle.setAttribute('aria-expanded', 'true');
+      }
+    });
+
+    const chestContainer = document.getElementById('chest-container');
+    chestContainer.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        if (!openButton.disabled) {
+          openButton.click();
+        }
+      }
+    });
+
+    updateStats();
+  </script>
+
+  <style>
+    /* Скрытый текст для aria */
+    .sr-only {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+    }
+  </style>
+</body>
+</html>
